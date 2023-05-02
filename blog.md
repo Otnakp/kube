@@ -1,6 +1,4 @@
-
-  
-# Kubernetes: noob to... mid    
+# Deploy and Scale like Google: Kubernetes 
 Kubernetes (k8s, count the words in "ubernete") is an open source container orchestration tool that lets you scale your applications easily and prevents downtime. That's a lot of things, so let's break them down one by one to get a clearer idea.    
     
 ## Big apps come with big responsibilities 
@@ -232,8 +230,10 @@ To reference it! Nice. Be careful that you can't just write ```my-username``` an
 ```bash
 echo -n 'my-password' | base64
 ```
-## Sanity check
+## Conclusion (sanity check)
 Well, we've gone from knowing nothing about anything to knowing something. You now know:
 - Microservices
 - Containers
 - Kubernetes basics: Pod, Deployment, Namespaces, Replicas, Config Maps and Secrets
+
+Congratulations, you now know the basics of Kubernetes and you are ready to use it, making your application as reliable, scalable and beautiful as the ones deployed by huge companies like Google or Amazon.
