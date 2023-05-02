@@ -1,2 +1,2 @@
 # kube
-go ![here](https://otnakp.github.io/kube)
+go here !https://otnakp.github.io/kube/
