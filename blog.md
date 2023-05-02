@@ -119,7 +119,121 @@ spec:
 Here we see some new things.
 - Notice ```apiVersion``` is now different, you need to specify that one if you want to use deployments
 - ```labels``` basically are key-value pairs that you can use to identify your pods. In this case we are using ```app: nginx```, which means that we are labeling our pods with the key ```app``` and the value ```nginx```. We will see later how to use these labels.
-- ```replicas``` is the number of pods you want to run. In this case we want 3 pods running at all times.
+- ```replicas``` is the number of pods you want to run. In this case we want 3 pods running at all times. We'll talk about this later in more detail
 - ```selector``` is used to select the pods you want to run. In this case we are using the same label we used before, ```app: nginx```. This means that we want to run pods that have the label ```app: nginx```.
 - ```template``` is the template of the pods you want to run. In this case we are using the same template we used before, so we are running pods with the same label and the same image.
 - ```labelFrom``` is a new thing. It basically says that the label of the deployment is the same as the label of the pods. This is useful because you can now use the label of the deployment to select the pods. For example, if you want to delete all the pods of a deployment, you can just delete the deployment and all the pods will be deleted too.
+
+Let's try to make labels a bit clearer. The ```matchLabels``` field specifies the label selector that the Deployment controller uses to identify which pods to manage. It looks for pods with the label ```app: nginx```. This association ensures that the Deployment only manages pods that match the specified labels, and not others. This will match ```app: nginx``` in the ```template.metadata```, so the deployment controller will identify this pod and manage it.
+You can now execute ```kubectl apply -f deployment.yaml```. To check your deployment, execute ```kubectl get deployments```.
+
+## Namespaces
+Namespaces are commonly used by programmers and they offer various advantages, for example giving the same name to elements in different namespaces. Kubernetes implements namespaces and you can by this point guess that you just have to add some fields to your ```yaml``` file. Here's an example:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: my-namespace
+  labels:
+    app: nginx
+spec:
+  # your spec
+```
+## Replicas and ReplicaSet
+A ReplicaSet is a lower level abstraction that ensures that you have a certain number of pods running everytime. It doesn't support rolling updates, and it's usually managed by a deployment. So you will usually not specify a ```ReplicaSet``` but you will do something along these lines:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: my-namespace
+  labels:
+    app: nginx
+spec:
+  replicas: 3 # replicas
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+```
+Now you are sure that 3 instances of your container are always running at once. Pretty straight forward uh?
+
+*Note: rolling updates is a deployment strategy that allows you to have minimal downtimes between updates. Kubernetes basically gradually removes old version pods while creating the new ones.*
+
+## Config Maps and Secrets
+In your application you may have many variables, for example ```containerPort```. It is not a good idea to hard code them in your ```yaml``` file, especially if you have multiple configuration files and those variables are shared between them (you would have to update all of them one by one in each). Kubernetes offers you the option to create config maps.
+```yaml
+kind: ConfigMap 
+apiVersion: v1 
+metadata:
+  name: my-configmap 
+data:
+  # Configuration values can be set as key-value properties
+  database: mongodb
+  database_uri: mongodb://localhost:27017
+```
+Now that you have a ConfigMap (you deploy it with the same exact command ```kubectl apply -f```) you can use them in your other ```yaml``` files.
+Then, in your deployment file, you can do
+```yaml
+env:
+  - name: DATABASE # give this variable the name of the env variable needed
+    valueFrom:
+      configMapKeyRef:
+        name: my-configmap
+        key: database
+  - name: DATABASE_URI
+    # can you complete it by yourself? Just reference the one above
+```
+Secrets are very similar to config map, but they are base64 encoded. This is not the most secure thing in the world because if someone finds your base64 encoded password and decodes it he will be able to see it. 
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+type: Opaque
+stringData:
+  username: my-username
+  password: my-password
+```
+After you apply it, you can use
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app-pod
+spec:
+  containers:
+  - name: my-app-container
+    image: my-app-image:v1
+    env:
+      - name: APP_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: my-secret
+            key: username
+      - name: APP_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: my-secret
+            key: password
+  restartPolicy: Never
+```
+To reference it! Nice. Be careful that you can't just write ```my-username``` and ```my-password``` but you have to base64 encode it. To do so you can use online tools or this bash command:
+```bash
+echo -n 'my-password' | base64
+```
+## Sanity check
+Well, we've gone from knowing nothing about anything to knowing something. You now know:
+- Microservices
+- Containers
+- Kubernetes basics: Pod, Deployment, Namespaces, Replicas, Config Maps and Secrets
