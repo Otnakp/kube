@@ -2,14 +2,14 @@
 Kubernetes (k8s, count the words in "ubernete") is an open source container orchestration tool that lets you scale your applications easily and prevents downtime. That's a lot of things, so let's break them down one by one to get a clearer idea.    
     
 ## Big apps come with big responsibilities 
-You may have developed some simple backend and frontend application, for example an app that lets you add records to a database. But let's go even simpler and let's not think of the DB now, let's say you have a frontend that sends numbers to a backend and the backend returns that number multiplied by 2. You deploy your app to the internet and you are good to go, right? No, you are not. You would be if this app was used by you and your friends, but in a **production** (very heavily used wording that means someone paid a lot of money to have the app built and running) environment you can't just say you are done, because you face some issues:    
+You may have developed some simple backend and frontend application, for example an app that lets you add records to a database. But let's go even simpler and let's not think of the DB now, let's say you have a frontend that sends numbers to a backend and the backend returns that number multiplied by 2. You deploy your app to the internet and you are good to go, right? No, you are not. You would be if this app was used by you and your friends, but in a **production** (very heavily used wording that means someone paid a lot of money to have the app built and running) environment you have to do something more, because you face some issues:    
     
  - What if I get so many users that the server gets overloaded and becomes very slow?    
  - What if you want to update your application? For example, you want to now support division by 2    
  - What if the backend crashes or is bugged? Will you restart it manually at 3 a.m.?     
    
 Kubernetes is what you need. Built by Google and open sourced in 2014, k8s solves all those issues, and more. Now that you know why Kubernetes matters we can start understanding how to use it.   
-As a small note, I would like to point out that k8s is not one of those topics where you see results or effects immediatly. It's not like a cool physics experiment or a topic like machine learning where you can immediatly see results like recognizing images or generating text. You will not be able to just deploy a huge application and see k8s in action, keeping it alive when a server goes down and scaling it at will. But you will be able to try cool things like updating your app in real time, with no down time, which is super cool. If you need motivation to keep going, just think that every major company (Google, Amazon, Meta ...) all use Kubernetes extensively and that it will be a very useful tool if you want to persue a software engineer career. It is also useful to deploy machine learning models.  
+As a small note, I would like to point out that k8s is not one of those topics where you see results or effects immediatly. It's not like a cool physics experiment or a topic like machine learning where you can immediatly see results like recognizing images or generating text. You will not be able to just deploy a huge application and see k8s in action, keeping it alive when a server goes down and scaling it at will. But you will be able to try cool things like updating your app in real time, with no down time, which is super cool. If you need motivation to keep going, just think that many major [company](https://kubernetes.io/case-studies/) all use Kubernetes extensively and that it will be a very useful tool if you want to persue a software engineer career. It is also useful to deploy machine learning models.  
   
 ## Microservices  
 *Feel free to skip this paragraph if you already know what microservices are*  
@@ -36,14 +36,12 @@ Let's say you have many users, what can you do? Well, open a new terminal and la
 You now have two totally separate applications running, effectively doubling the speed of your program.
 We're done right? Not really. Virtual machines are not very lightweight (even though they are pretty fast) and have one major drawback: you don't need a new full fledged operating system instance to run your app. You have 2 kernels for example, doing the same exact thing. Computer scientists really don't like when 2 pieces of code are running doing the same exact thing and wasting resources. (And you know who *really* doesn't like wasting resources? Companies, because resources cost money, and companies want to maximize the amount of money they have, so they don't want to spend it). 
 
-Enter *containers*.
-
-Containers solve the issue of having a duplicate kernel running by saying:
+The solution this problem are containers. Containers solve the issue of having a duplicate kernel running by saying:
 
  - I'm running on Linux
  - I have, below me, a working Linux kernel, so I'm just going to use that
 
-Now you go ahead, download **Docker**, the most widely used software to handle containers. Docker runs on the operating system and containers run on top of Docker.
+Now you go ahead, download **[Docker](https://www.docker.com/)**, the most widely used software to handle containers. Docker runs on the operating system and containers run on top of Docker.
 
 ![Docker](images/container.png)
 
@@ -60,7 +58,7 @@ Kubernetes is an open source tool initially developed by Google and now maintain
 
 ## Kubernetes basics
 
-We could talk about the master node, etcd and many others low level things, but we won't. We will just talk about the basics, the things you need to know to understand some Kubernetes from a more practical point of view.
+We could talk about the master node, etcd and many others low level things, but we won't. We will just talk about the basics, the things you need to know to understand Kubernetes from a more practical point of view.
 
 ### Pods and Nodes
 
@@ -117,7 +115,7 @@ spec:
 Here we see some new things.
 - Notice ```apiVersion``` is now different, you need to specify that one if you want to use deployments
 - ```labels``` basically are key-value pairs that you can use to identify your pods. In this case we are using ```app: nginx```, which means that we are labeling our pods with the key ```app``` and the value ```nginx```. We will see later how to use these labels.
-- ```replicas``` is the number of pods you want to run. In this case we want 3 pods running at all times. We'll talk about this later in more detail
+- ```replicas``` is the number of pods you want to run. In this case we want 3 pods running at all times. We'll talk about this later in more detail.
 - ```selector``` is used to select the pods you want to run. In this case we are using the same label we used before, ```app: nginx```. This means that we want to run pods that have the label ```app: nginx```.
 - ```template``` is the template of the pods you want to run. In this case we are using the same template we used before, so we are running pods with the same label and the same image.
 - ```labelFrom``` is a new thing. It basically says that the label of the deployment is the same as the label of the pods. This is useful because you can now use the label of the deployment to select the pods. For example, if you want to delete all the pods of a deployment, you can just delete the deployment and all the pods will be deleted too.
@@ -193,7 +191,7 @@ env:
     # can you complete it by yourself? Just reference the one above
 ```
 Secrets are very similar to config map, but they are base64 encoded. This is not the most secure thing in the world because if someone finds your base64 encoded password and decodes it he will be able to see it. 
-```
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -204,7 +202,7 @@ stringData:
   password: my-password
 ```
 After you apply it, you can use
-```
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
